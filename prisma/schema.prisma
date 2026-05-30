@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TokenConfig {
+  id                     String           @id @default(cuid())
+  name                   String
+  symbol                 String
+  chain                  String
+  contractAddress        String
+  pairAddress            String?
+  dexName                String
+  openPriceIdr           Decimal          @db.Decimal(20, 8)
+  totalSupply            Decimal          @db.Decimal(30, 8)
+  stakingReserve         Decimal          @db.Decimal(30, 8)
+  rewardEmissionDailyCap Decimal          @db.Decimal(30, 8)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  marketSnapshots        MarketSnapshot[]
+}
+
+model MarketSnapshot {
+  id              String      @id @default(cuid())
+  tokenConfigId   String
+  tokenConfig     TokenConfig @relation(fields: [tokenConfigId], references: [id], onDelete: Cascade)
+  priceUsd        Decimal     @db.Decimal(20, 10)
+  priceIdr        Decimal     @db.Decimal(20, 8)
+  liquidityUsd    Decimal     @db.Decimal(20, 2)
+  volume24h       Decimal     @db.Decimal(20, 2)
+  marketCap       Decimal?    @db.Decimal(20, 2)
+  fdv             Decimal?    @db.Decimal(20, 2)
+  txnsBuy24h      Int
+  txnsSell24h     Int
+  priceChange1h   Decimal     @db.Decimal(10, 4)
+  priceChange6h   Decimal     @db.Decimal(10, 4)
+  priceChange24h  Decimal     @db.Decimal(10, 4)
+  createdAt       DateTime    @default(now())
+
+  @@index([tokenConfigId, createdAt])
+}
+
+model SocialPost {
+  id             String    @id @default(cuid())
+  source         String
+  externalId     String    @unique
+  authorUsername String
+  text           String
+  url            String
+  likeCount      Int       @default(0)
+  repostCount    Int       @default(0)
+  replyCount     Int       @default(0)
+  quoteCount     Int       @default(0)
+  viewCount      Int       @default(0)
+  sentiment      String?
+  sentimentScore Decimal?  @db.Decimal(5, 4)
+  spamScore      Decimal?  @db.Decimal(5, 4)
+  topic          String?
+  createdAt      DateTime
+  analyzedAt     DateTime?
+
+  @@index([source, createdAt])
+  @@index([sentiment])
+}
+
+model SocialTrendSnapshot {
+  id                 String   @id @default(cuid())
+  keyword            String
+  totalMentions      Int
+  positiveCount      Int
+  negativeCount      Int
+  neutralCount       Int
+  spamCount          Int
+  topTopicsJson      Json
+  trendVelocityScore Decimal  @db.Decimal(6, 4)
+  createdAt          DateTime @default(now())
+
+  @@index([keyword, createdAt])
+}
+
+model NewsArticle {
+  id             String    @id @default(cuid())
+  source         String
+  title          String
+  url            String    @unique
+  publishedAt    DateTime
+  summary        String?
+  relevanceScore Decimal   @db.Decimal(5, 4)
+  impact         String?
+  impactScore    Decimal?  @db.Decimal(5, 4)
+  category       String?
+  analyzedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([publishedAt])
+  @@index([impact])
+}
+
+model PredictionSnapshot {
+  id                   String   @id @default(cuid())
+  bullishProbability   Decimal  @db.Decimal(5, 4)
+  bearishProbability   Decimal  @db.Decimal(5, 4)
+  sidewaysProbability  Decimal  @db.Decimal(5, 4)
+  confidence           Decimal  @db.Decimal(5, 4)
+  signal               String
+  riskLevel            String
+  riskScore            Decimal  @db.Decimal(5, 4)
+  reasonsJson          Json
+  marketScore          Decimal  @db.Decimal(5, 4)
+  socialScore          Decimal  @db.Decimal(5, 4)
+  newsScore            Decimal  @db.Decimal(5, 4)
+  liquidityScore       Decimal  @db.Decimal(5, 4)
+  whaleScore           Decimal  @db.Decimal(5, 4)
+  createdAt            DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([signal, riskLevel])
+}
+
+model Alert {
+  id        String   @id @default(cuid())
+  type      String
+  severity  String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([severity, isRead])
+}
+
+model ApiLog {
+  id           String   @id @default(cuid())
+  provider     String
+  endpoint     String
+  status       String
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  @@index([provider, createdAt])
+}
