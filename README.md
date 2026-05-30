@@ -34,6 +34,28 @@ npm run dev
 
 Open `http://localhost:3000/dashboard`.
 
+## Deploy to Vercel
+
+1. Push/import this repository into Vercel.
+2. Framework preset: `Next.js`.
+3. Install command: `npm install`.
+4. Build command: `npm run build`.
+5. Output directory: leave empty/default.
+6. Add environment variables in Vercel Project Settings.
+7. If `MOCK_DATA_MODE=false`, run the Prisma migration against your production PostgreSQL database before using live collectors:
+
+```bash
+npx prisma migrate deploy
+```
+
+The app includes `vercel.json` with one daily cron job on `/api/collect/all`, which is compatible with Vercel Hobby plan limits. The existing individual collector routes can still be called manually:
+
+- `/api/collect/market`
+- `/api/collect/social`
+- `/api/collect/news`
+
+On Vercel, admin settings are read from Environment Variables instead of `data/admin-settings.json`, because serverless filesystem writes are not persistent.
+
 ## Environment Variables
 
 `MOCK_DATA_MODE=true` makes the app use reserve/sample data. If an API key is missing, connectors use reserve data or heuristic analysis instead of failing.
@@ -52,6 +74,18 @@ Important variables:
 - `X_BEARER_TOKEN`
 - `COINGECKO_API_KEY`
 - `CRON_SECRET`
+- `SOCIAL_ANALYSIS_LIMIT`
+- `NEWS_ANALYSIS_LIMIT`
+
+Recommended Vercel starter values:
+
+```bash
+MOCK_DATA_MODE=true
+APP_BASE_URL=https://your-vercel-domain.vercel.app
+SOCIAL_ANALYSIS_LIMIT=25
+NEWS_ANALYSIS_LIMIT=25
+CRON_SECRET=use-a-random-string-at-least-16-chars
+```
 
 ## API Routes
 

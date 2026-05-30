@@ -14,7 +14,10 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   X_BEARER_TOKEN: z.string().optional(),
   COINGECKO_API_KEY: z.string().optional(),
-  CRON_SECRET: z.string().optional()
+  CRON_SECRET: z.string().optional(),
+  SOCIAL_ANALYSIS_LIMIT: z.string().optional(),
+  NEWS_ANALYSIS_LIMIT: z.string().optional(),
+  VERCEL: z.string().optional()
 });
 
 export const env = envSchema.parse(process.env);
@@ -25,4 +28,14 @@ export function isMockMode() {
 
 export function hasSecret(value?: string) {
   return Boolean(value && value.trim().length > 0);
+}
+
+export function envInt(value: string | undefined, fallback: number, min: number, max: number) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, Math.trunc(parsed)));
+}
+
+export function isVercelRuntime() {
+  return env.VERCEL === "1";
 }

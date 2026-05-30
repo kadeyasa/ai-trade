@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Table, Td, Th } from "@/components/ui/Table";
 import { tokenConfig } from "@/config/token";
-import { getAdminSettings, getCoinGeckoApiKey, getCronSecret, getOpenAIKey, getXBearerToken, maskSecret } from "@/lib/admin-settings";
+import { canPersistAdminSettings, getAdminSettings, getCoinGeckoApiKey, getCronSecret, getOpenAIKey, getXBearerToken, maskSecret } from "@/lib/admin-settings";
 import { hasSecret, isMockMode } from "@/lib/env";
 import { saveSettingsAction } from "@/app/admin/actions";
 
@@ -16,6 +16,7 @@ export default function AdminPage() {
   const xBearerToken = getXBearerToken();
   const coingeckoApiKey = getCoinGeckoApiKey();
   const cronSecret = getCronSecret();
+  const canPersistSettings = canPersistAdminSettings();
   const providers = [
     ["DEX Screener", "No key required", true],
     ["CoinGecko", maskSecret(coingeckoApiKey), hasSecret(coingeckoApiKey)],
@@ -57,6 +58,7 @@ export default function AdminPage() {
                   name="openaiApiKey"
                   type="password"
                   placeholder={maskSecret(openaiKey)}
+                  disabled={!canPersistSettings}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                 />
               </label>
@@ -66,6 +68,7 @@ export default function AdminPage() {
                   name="xBearerToken"
                   type="password"
                   placeholder={maskSecret(xBearerToken)}
+                  disabled={!canPersistSettings}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                 />
               </label>
@@ -75,6 +78,7 @@ export default function AdminPage() {
                   name="coingeckoApiKey"
                   type="password"
                   placeholder={maskSecret(coingeckoApiKey)}
+                  disabled={!canPersistSettings}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                 />
               </label>
@@ -84,6 +88,7 @@ export default function AdminPage() {
                   name="cronSecret"
                   type="password"
                   placeholder={maskSecret(cronSecret)}
+                  disabled={!canPersistSettings}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                 />
               </label>
@@ -97,6 +102,7 @@ export default function AdminPage() {
                   min="10"
                   max="100"
                   defaultValue={settings.socialAnalysisLimit}
+                  disabled={!canPersistSettings}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                 />
               </label>
@@ -108,15 +114,18 @@ export default function AdminPage() {
                   min="10"
                   max="100"
                   defaultValue={settings.newsAnalysisLimit}
+                  disabled={!canPersistSettings}
                   className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
                 />
               </label>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-slate-50 p-4">
               <p className="text-sm text-slate-600">
-                Field key boleh dikosongkan jika tidak ingin mengubah key yang sudah tersimpan. Limit dipakai untuk X API/GDELT dan data cadangan.
+                {canPersistSettings
+                  ? "Field key boleh dikosongkan jika tidak ingin mengubah key yang sudah tersimpan. Limit dipakai untuk X API/GDELT dan data cadangan."
+                  : "Di Vercel, ubah key dan limit dari Project Settings > Environment Variables agar aman dan persistent."}
               </p>
-              <button type="submit" className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+              <button type="submit" disabled={!canPersistSettings} className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300">
                 Simpan Settings
               </button>
             </div>
