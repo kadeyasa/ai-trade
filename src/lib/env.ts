@@ -14,6 +14,7 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   X_BEARER_TOKEN: z.string().optional(),
   COINGECKO_API_KEY: z.string().optional(),
+  FASTAPI_PREDICTION_URL: z.string().optional(),
   CRON_SECRET: z.string().optional(),
   SOCIAL_ANALYSIS_LIMIT: z.string().optional(),
   NEWS_ANALYSIS_LIMIT: z.string().optional(),

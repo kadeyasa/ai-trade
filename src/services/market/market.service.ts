@@ -65,9 +65,16 @@ export async function getCoinAnalysisMarket(coinId: string): Promise<MarketSnaps
   return (await fetchCoinGeckoMarketById(coinId).catch(() => null)) ?? mockMarket;
 }
 
-export async function getCoinAnalysisSeries(coinId: string): Promise<MarketSeriesPoint[]> {
+function timeframeDays(timeframe = "1h") {
+  if (timeframe === "15m") return 2;
+  if (timeframe === "4h") return 30;
+  if (timeframe === "1d") return 180;
+  return 7;
+}
+
+export async function getCoinAnalysisSeries(coinId: string, timeframe = "1h"): Promise<MarketSeriesPoint[]> {
   if (!coinId) return getMarketSeries();
-  return (await fetchCoinGeckoSeries(coinId).catch(() => null)) ?? mockMarketSeries;
+  return (await fetchCoinGeckoSeries(coinId, timeframeDays(timeframe)).catch(() => null)) ?? mockMarketSeries;
 }
 
 export async function getMarketSeries(): Promise<MarketSeriesPoint[]> {

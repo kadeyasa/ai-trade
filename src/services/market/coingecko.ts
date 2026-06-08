@@ -117,8 +117,8 @@ export async function fetchCoinGeckoMarketById(coinId: string) {
   return fetchCoinGeckoMarket("", coinId);
 }
 
-export async function fetchCoinGeckoSeries(coinId: string): Promise<MarketSeriesPoint[]> {
-  const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1`, {
+export async function fetchCoinGeckoSeries(coinId: string, days = 7): Promise<MarketSeriesPoint[]> {
+  const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`, {
     headers: coinGeckoHeaders(),
     next: { revalidate: 120 }
   });
@@ -132,7 +132,7 @@ export async function fetchCoinGeckoSeries(coinId: string): Promise<MarketSeries
 
   const volumes = data.total_volumes ?? [];
   const marketCaps = data.market_caps ?? [];
-  return (data.prices ?? []).slice(-24).map(([timestamp, price], index) => ({
+  return (data.prices ?? []).map(([timestamp, price], index) => ({
     time: new Date(timestamp).toISOString(),
     priceUsd: price,
     liquidityUsd: marketCaps[index]?.[1] ?? 0,

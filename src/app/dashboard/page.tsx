@@ -2,7 +2,6 @@ import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { CoinGeckoDataPanel } from "@/components/dashboard/CoinGeckoDataPanel";
 import { ComprehensiveAnalysisPanel } from "@/components/dashboard/ComprehensiveAnalysisPanel";
 import { DataSourcesPanel } from "@/components/dashboard/DataSourcesPanel";
-import { EntryInsightPanel } from "@/components/dashboard/EntryInsightPanel";
 import { HypeMarketInsights } from "@/components/dashboard/HypeMarketInsights";
 import { IndicatorControls, type SignalIndicator } from "@/components/dashboard/IndicatorControls";
 import { MarketOverview } from "@/components/dashboard/MarketOverview";
@@ -10,14 +9,15 @@ import { NewsImpactPanel } from "@/components/dashboard/NewsImpactPanel";
 import { PredictionSignal } from "@/components/dashboard/PredictionSignal";
 import { PriceChart } from "@/components/dashboard/PriceChart";
 import { RiskScoreCard } from "@/components/dashboard/RiskScoreCard";
+import { SignalPanel } from "@/components/dashboard/SignalPanel";
 import { SocialTrendCard } from "@/components/dashboard/SocialTrendCard";
 import { TokenHealthPanel } from "@/components/dashboard/TokenHealthPanel";
+import { TradingPredictionChart } from "@/components/dashboard/TradingPredictionChart";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { scoringWeights } from "@/config/scoring";
 import { tokenConfig as defaultTokenConfig } from "@/config/token";
 import { getAdminSettings, getOpenAIKey, getXBearerToken } from "@/lib/admin-settings";
-import { createEntryInsight } from "@/lib/entry-insight";
 import { hasSecret } from "@/lib/env";
 import { mockAlerts } from "@/lib/mock-data";
 import { createPrediction } from "@/lib/scoring";
@@ -26,6 +26,7 @@ import { getHypeMarketInsight } from "@/services/insights/hype.service";
 import { getCoinAnalysisMarket, getCoinAnalysisSeries, getCryptoAssetById } from "@/services/market/market.service";
 import { getNewsForToken } from "@/services/news/news.service";
 import { getSocialForToken } from "@/services/social/social.service";
+import { getTradingPrediction } from "@/services/prediction/trading-prediction.service";
 import type { AnalysisSource } from "@/types/analysis";
 import type { TokenConfigView } from "@/types/token";
 
@@ -128,7 +129,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
     prediction,
     sources
   });
-  const entryInsight = createEntryInsight(market, series);
+  const tradingPrediction = await getTradingPrediction({ symbol: selectedToken.symbol, series });
   const indicators: SignalIndicator[] = [
     {
       key: "market",
@@ -176,7 +177,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
     <PageContainer token={selectedToken}>
       <div className="space-y-6">
         <CoinGeckoDataPanel asset={selectedAsset} />
-        <EntryInsightPanel insight={entryInsight} />
+        <SignalPanel prediction={tradingPrediction} />
+        <TradingPredictionChart coinId={selectedAsset.id} prediction={tradingPrediction} />
         <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
           <PredictionSignal prediction={prediction} />
           <RiskScoreCard prediction={prediction} />

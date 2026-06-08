@@ -121,6 +121,25 @@ model PredictionSnapshot {
   @@index([signal, riskLevel])
 }
 
+model TradingAnalysis {
+  id              String   @id @default(cuid())
+  symbol          String
+  timeframe       String
+  signal          String
+  scenario        String
+  confidence      Int
+  entryPrice      Decimal  @db.Decimal(20, 10)
+  stopLoss        Decimal  @db.Decimal(20, 10)
+  takeProfit1     Decimal  @db.Decimal(20, 10)
+  takeProfit2     Decimal  @db.Decimal(20, 10)
+  riskRewardRatio Decimal  @db.Decimal(10, 4)
+  analysisJson    Json
+  createdAt       DateTime @default(now())
+
+  @@index([symbol, timeframe, createdAt])
+  @@index([signal, scenario])
+}
+
 model Alert {
   id        String   @id @default(cuid())
   type      String
