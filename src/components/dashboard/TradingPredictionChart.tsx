@@ -13,7 +13,7 @@ import {
   type SeriesMarker,
   type UTCTimestamp
 } from "lightweight-charts";
-import { Activity, BarChart3, CheckCircle2, Clock3, Crosshair, Gauge, GitBranch, Layers3, Shield, Target, TrendingDown, TrendingUp, XCircle } from "lucide-react";
+import { Activity, BarChart3, CheckCircle2, Clock3, Crosshair, Eye, Gauge, GitBranch, Layers3, Shield, Target, TrendingDown, TrendingUp, X, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatBox } from "@/components/ui/StatBox";
@@ -132,6 +132,7 @@ export function TradingPredictionChart({ coinId, prediction: initialPrediction }
   const [isLoadingTimeframe, setIsLoadingTimeframe] = useState(false);
   const [liveStatus, setLiveStatus] = useState<"connecting" | "live" | "fallback">("connecting");
   const [layers, setLayers] = useState(defaultLayers);
+  const [showChartOverlay, setShowChartOverlay] = useState(true);
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartApiRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -581,33 +582,64 @@ export function TradingPredictionChart({ coinId, prediction: initialPrediction }
         </div>
 
         <div className="relative">
-          <div
-            className={cn(
-              "pointer-events-none absolute left-3 top-3 z-10 rounded-md border px-3 py-2 text-sm shadow-sm",
-              signalOverlayClass(prediction.signal)
-            )}
-          >
-            <div className="text-xs font-semibold uppercase tracking-wide opacity-75">Chart Signal</div>
-            <div className="mt-1 text-lg font-bold">{signalLabel(prediction.signal)}</div>
-            <div className="mt-1 text-xs">Entry {formatUsd(prediction.risk.entryPrice)} · {prediction.confidence}%</div>
-          </div>
-          <div className="pointer-events-none absolute right-3 top-3 z-10 w-[280px] rounded-md border border-slate-200 bg-white/95 p-3 text-xs shadow-sm backdrop-blur">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="font-semibold uppercase tracking-wide text-slate-500">Signal Evidence</div>
-              <span className={cn("rounded-full px-2 py-0.5 font-semibold", signalOverlayClass(prediction.signal))}>{signalLabel(prediction.signal)}</span>
-            </div>
-            <div className="space-y-2">
-              {chartEvidence.map((item) => (
-                <div className="flex items-start gap-2" key={item.name}>
-                  {item.passed ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" /> : <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />}
-                  <div>
-                    <div className={item.passed ? "font-semibold text-ink" : "font-semibold text-slate-500"}>{item.name}</div>
-                    <div className="text-slate-500">{item.note}</div>
-                  </div>
+          {showChartOverlay ? (
+            <>
+              <div
+                className={cn(
+                  "absolute left-3 top-3 z-10 rounded-md border px-3 py-2 pr-9 text-sm shadow-sm",
+                  signalOverlayClass(prediction.signal)
+                )}
+              >
+                <button
+                  aria-label="Close chart signal overlay"
+                  className="absolute right-2 top-2 rounded-full p-1 opacity-70 hover:bg-white/60 hover:opacity-100"
+                  onClick={() => setShowChartOverlay(false)}
+                  type="button"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                <div className="text-xs font-semibold uppercase tracking-wide opacity-75">Chart Signal</div>
+                <div className="mt-1 text-lg font-bold">{signalLabel(prediction.signal)}</div>
+                <div className="mt-1 text-xs">Entry {formatUsd(prediction.risk.entryPrice)} · {prediction.confidence}%</div>
+              </div>
+              <div className="absolute right-3 top-3 z-10 w-[280px] rounded-md border border-slate-200 bg-white/95 p-3 pr-9 text-xs shadow-sm backdrop-blur">
+                <button
+                  aria-label="Close signal evidence overlay"
+                  className="absolute right-2 top-2 rounded-full p-1 text-slate-500 hover:bg-slate-100 hover:text-ink"
+                  onClick={() => setShowChartOverlay(false)}
+                  type="button"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="font-semibold uppercase tracking-wide text-slate-500">Signal Evidence</div>
+                  <span className={cn("rounded-full px-2 py-0.5 font-semibold", signalOverlayClass(prediction.signal))}>{signalLabel(prediction.signal)}</span>
                 </div>
-              ))}
+                <div className="space-y-2">
+                  {chartEvidence.map((item) => (
+                    <div className="flex items-start gap-2" key={item.name}>
+                      {item.passed ? <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" /> : <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />}
+                      <div>
+                        <div className={item.passed ? "font-semibold text-ink" : "font-semibold text-slate-500"}>{item.name}</div>
+                        <div className="text-slate-500">{item.note}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="absolute right-3 top-3 z-10">
+              <button
+                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur hover:border-slate-300"
+                onClick={() => setShowChartOverlay(true)}
+                type="button"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Signal
+              </button>
             </div>
-          </div>
+          )}
           <div className={cn("relative h-[500px] w-full overflow-hidden rounded-md border border-slate-200 bg-[#fbfdff]", isLoadingTimeframe && "opacity-60")} ref={chartRef} />
         </div>
 
